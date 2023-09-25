@@ -1,0 +1,205 @@
+﻿<Window x:Class="Test.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:test="clr-namespace:Test"
+        mc:Ignorable="d"
+        Title="Smart Objects" Height="450" Width="800"
+        DataContext="{Binding RelativeSource={RelativeSource Self}}"
+        >
+    <Window.Resources>
+        <test:NotConverter x:Key="NotConverter" />
+        
+        <Style x:Key="NameStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+
+        <Style x:Key="HeaderColumnStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+
+        <Style x:Key="LoadListBoxHeaderStyle" TargetType="{x:Type Border}">
+            <Setter Property="Background" Value="#f5cc84"/>
+            <Setter Property="BorderBrush" Value="Black"/>
+            <Setter Property="BorderThickness" Value="0.5"/>
+        </Style>
+        
+        <Style x:Key="ExportListBoxHeaderStyle" TargetType="{x:Type Border}">
+            <Setter Property="Background" Value="#ccd5f0"/>
+            <Setter Property="BorderBrush" Value="Black"/>
+            <Setter Property="BorderThickness" Value="0.5"/>
+        </Style>
+
+
+        
+        <!--Load Template-->
+        <DataTemplate x:Key="loadTemplate">
+            <Grid >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition SharedSizeGroup="c1" MinWidth="{Binding columnMinWidth}"/>
+                    <ColumnDefinition SharedSizeGroup="c2" MinWidth="{Binding columnMinWidth}">
+                    </ColumnDefinition>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="{Binding  Path=Name}" Style="{DynamicResource NameStyle}"  Margin="5"/>
+                <TextBlock Grid.Column="1" Text="{Binding Path=TemplateName}"  Margin="5"/>
+
+            </Grid>
+        </DataTemplate>
+        <!--Load Template-->
+
+        <!--Export Template-->
+        <DataTemplate x:Key="exportTemplate">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition SharedSizeGroup="c3" MinWidth="{Binding columnMinWidth}"/>
+                    <ColumnDefinition SharedSizeGroup="c4" MinWidth="{Binding columnMinWidth}"/>
+                    <ColumnDefinition SharedSizeGroup="c5" MinWidth="{Binding columnMinWidth}"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="{Binding  Path=Name}" Style="{DynamicResource NameStyle}"  Margin="5"/>
+                <TextBlock Grid.Column="1" Text="{Binding Path=Value}" Margin="5"/>
+                <TextBlock Grid.Column="2" Text="{Binding Path=Type}" Margin="5"/>
+            </Grid>
+        </DataTemplate>
+        <!--Export Template-->
+
+    </Window.Resources>
+
+    <Grid Grid.IsSharedSizeScope="True">
+
+        <!--RowDefinitions-->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <!--RowDefinitions-->
+
+        <!--ColumnDefinitions-->
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <!--ColumnDefinitions-->
+
+        <!--LoadBtn-->
+        <Button Content="Load" x:Name="LoadBtn" Command="{Binding LoadSmartObjectInfoCommand, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type test:MainWindow}}}" 
+                >
+            <Button.Style>
+                <Style TargetType="Button">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <!--Change the content and background color-->
+                            <ControlTemplate TargetType="Button">
+
+                                <Border Background="{TemplateBinding Background}" BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{TemplateBinding BorderBrush}">
+                                    <ContentPresenter Name="content" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+
+                                <ControlTemplate.Triggers>
+
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#bee6fd"/>
+                                    </Trigger>
+
+                                    <DataTrigger Binding="{Binding IsLoading}" Value="True">
+                                        <Setter TargetName="content" Property="ContentPresenter.Content" Value="loading...">
+                                        </Setter>
+                                    </DataTrigger>
+
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                            <!--Change the content and background color-->
+                        </Setter.Value>
+                    </Setter>
+
+                </Style>
+            </Button.Style>
+        </Button>
+        <!---LoadBtn-->
+
+        <!---ExportBtn-->
+        <Button Grid.Row="0"
+            Grid.Column="1"
+            Content="Export" x:Name="ExportBtn" Command="{Binding ExportCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type test:MainWindow}}}" 
+                >
+            <Button.Style>
+                <Style TargetType="Button">
+                    <!--Disable Export Button when Load button clicked && Diabled when Load List is empty-->
+                    <Style.Triggers>
+
+                        <DataTrigger Binding="{Binding ElementName=LoadList, Path=HasItems}" Value="false">
+                            <Setter Property="IsEnabled" Value="False"/>
+                        </DataTrigger>
+
+                        <DataTrigger Binding="{Binding IsLoading}" Value="True">
+                            <Setter Property="IsEnabled"  Value="false">
+                            </Setter>
+                        </DataTrigger>
+
+                    </Style.Triggers>
+                    <!--Disable Export Button when Load button clicked && Diabled when Load List is empty-->
+                </Style>
+            </Button.Style>
+        </Button>
+        <!---ExportBtn-->
+
+        <!--Load List Header-->
+        <Border  Grid.Row="1" Grid.Column="0" Style="{DynamicResource LoadListBoxHeaderStyle}" 
+                >
+            <Grid Name="LoadHeader"  Margin="5">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="c1" MinWidth="{Binding columnMinWidth}" />
+                        <ColumnDefinition SharedSizeGroup="c2" MinWidth="{Binding columnMinWidth}"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Name" Style="{DynamicResource HeaderColumnStyle}"/>
+                    <TextBlock Grid.Column="1" Text="Template Name" Style="{DynamicResource HeaderColumnStyle}"/>
+                </Grid>
+            </Grid>
+
+        </Border>
+        <!--Load List Header-->
+
+        <!---Load List-->
+        <ListBox Grid.Row="2"
+             Grid.Column="0" x:Name="LoadList" ItemTemplate="{StaticResource loadTemplate}" 
+             SelectionMode="Single"
+             SelectionChanged="LoadList_SelectionChanged"
+             HorizontalContentAlignment="Stretch"
+                 ItemsSource="{Binding SmartObjects}">
+            <ListBox.Resources>
+            </ListBox.Resources>
+        </ListBox>
+        <!---Load List-->
+
+        <!--Export List Header -->
+        <Border Grid.Row="1" Grid.Column="1"  Style="{DynamicResource ExportListBoxHeaderStyle}">
+            <Grid Name="ExportHeader" Margin="5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition SharedSizeGroup="c3" MinWidth="{Binding columnMinWidth}"/>
+                    <ColumnDefinition SharedSizeGroup="c4" MinWidth="{Binding columnMinWidth}"/>
+                    <ColumnDefinition SharedSizeGroup="c5" MinWidth="{Binding columnMinWidth}"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="Name" Style="{DynamicResource HeaderColumnStyle}"/>
+                <TextBlock Grid.Column="1" Text="Value" Style="{DynamicResource HeaderColumnStyle}"/>
+                <TextBlock Grid.Column="2" Text="Type" Style="{DynamicResource HeaderColumnStyle}"/>
+            </Grid>
+        </Border>
+        <!--Export List Header -->
+
+        <!---Export List-->
+        <ListBox Grid.Row="2"
+             Grid.Column="1" x:Name="ExportList" ItemTemplate="{StaticResource exportTemplate}"
+                 HorizontalContentAlignment="Stretch"
+                 ItemsSource="{Binding SelectedSmartObject.Properties}">
+            <ListBox.Resources></ListBox.Resources>
+        </ListBox>
+        <!---Export List-->
+
+
+    </Grid>
+</Window>
